@@ -30,7 +30,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Driver extends Application {
-	
+
 	private StackPane container;
 	private Button btuIcon;
 	private Image iconImage;
@@ -58,20 +58,27 @@ public class Driver extends Application {
 	Stage primaryStage;
 
 	static File btselemFile;
-	boolean isActivated = true;// to handle when to read one city for statistics or read all of them for the summary
+	boolean isActivated = true;// to handle when to read one city for statistics or read all of them for the
+								// summary
 	SummeryPane summeryPane;
-	
+
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
-		
+
 		container = new StackPane();
 		btuIcon = new Button();
-		iconImage = new Image("palestine-logo.png");
-		iconImageView = new ImageView(iconImage);
-		iconImageView.setFitWidth(45);
-		iconImageView.setFitHeight(45);
-		btuIcon.setGraphic(iconImageView);
+		try {
+			iconImage = new Image(getClass().getResourceAsStream("/palestine-logo.png"));
+			iconImageView = new ImageView(iconImage);
+			iconImageView.setFitWidth(45);
+			iconImageView.setFitHeight(45);
+			btuIcon.setGraphic(iconImageView);
+		} catch (Exception e) {
+			// If image not found, use text button instead
+			btuIcon.setText("🇵🇸");
+			System.out.println("Icon image not found: " + e.getMessage());
+		}
 		btuIcon.setStyle("-fx-background-color:transparent;-fx-cursor:hand;");
 		btuIcon.setPadding(new Insets(0, 325, 0, 0));
 		btuSummary = new Button("Summary");
@@ -141,10 +148,16 @@ public class Driver extends Application {
 		boxMain.setAlignment(Pos.CENTER);
 		boxMain.setSpacing(20);
 		// Background Image
-		backgroundImage = new Image("background1.jpg");
-		background = new ImageView(backgroundImage);
-		background.setFitWidth(800);
-		background.setFitHeight(600);
+		try {
+			backgroundImage = new Image(getClass().getResourceAsStream("/background1.jpg"));
+			background = new ImageView(backgroundImage);
+			background.setFitWidth(800);
+			background.setFitHeight(600);
+		} catch (Exception e) {
+			// If image not found, create a colored background
+			background = new ImageView();
+			System.out.println("Background image not found: " + e.getMessage());
+		}
 		// creating the shady background
 		balckShade = new Pane();
 		balckShade.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
@@ -170,7 +183,8 @@ public class Driver extends Application {
 						String[] info = line.split(",");
 						if (!cities.contains(info[2])) {// info[2] represents the city name
 							LocationRecord locationRecord = new LocationRecord(info[2]);
-							LocationPane.locations.getItems().add(info[2]);// to let the user see the available cites on the combo box
+							LocationPane.locations.getItems().add(info[2]);// to let the user see the available cites on
+																			// the combo box
 							cities.add(locationRecord);
 						}
 
@@ -247,12 +261,12 @@ public class Driver extends Application {
 						if (!cities.contains(info[2])) {// info[2] represents the city name
 							LocationRecord locationRecord = new LocationRecord(info[2]);
 							cities.add(locationRecord);
-							Martyr martyr = createMartyr(info,date);
+							Martyr martyr = createMartyr(info, date);
 							locationRecord.getNamesTree().insert(martyr);
 							locationRecord.getDatesTree().insert(martyr);
 
 						} else {
-							Martyr martyr = createMartyr(info,date);
+							Martyr martyr = createMartyr(info, date);
 							cities.getNode(info[2]).locationRecord.getNamesTree().insert(martyr);
 							cities.getNode(info[2]).locationRecord.getDatesTree().insert(martyr);
 							// to link the martyr with his/her own node
@@ -263,12 +277,12 @@ public class Driver extends Application {
 					ObservableList<SummaryTable> list = FXCollections.observableArrayList();
 					LocationRecord locationRecord;
 					int sumHeight1 = 0, sumHeight2 = 0, sumNumberOfMartyrs = 0;
-					for (int i = 1; i <=cities.length(); i++) {
+					for (int i = 1; i <= cities.length(); i++) {
 						locationRecord = cities.getNode(i).locationRecord;
 						SummaryTable summary = new SummaryTable();
 						summary.setCityName(locationRecord.getLocationName());
 						summary.setHeightAVL1(locationRecord.getNamesTree().heihgt());
-						sumHeight1+= locationRecord.getNamesTree().heihgt();
+						sumHeight1 += locationRecord.getNamesTree().heihgt();
 						summary.setHeightAVL2(locationRecord.getDatesTree().heihgt());
 						sumHeight2 += locationRecord.getDatesTree().heihgt();
 						MaxMartyrsInfo maxDate = locationRecord.getDatesTree().findMaximumNumber();
@@ -287,7 +301,7 @@ public class Driver extends Application {
 					summary.setMaxDeathsDate(null);
 					list.add(summary);
 					summeryPane.table.setItems(list);
-					
+
 				} catch (FileNotFoundException e2) {
 					e2.printStackTrace();
 				} catch (ParseException e1) {
@@ -295,12 +309,12 @@ public class Driver extends Application {
 				}
 			}
 			primaryStage.setScene(summaryScene);
-			isActivated = false;//set it to false you download all the info of all the martyrs  
+			isActivated = false;// set it to false you download all the info of all the martyrs
 		}
 
 	}
-	
-	//creating the martyr from the information in the file
+
+	// creating the martyr from the information in the file
 	public Martyr createMartyr(String[] info, Date date) {
 		Martyr martyr;
 		if (info[1] != "") {// info[1] represents the age of the martyr
